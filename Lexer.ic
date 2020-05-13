@@ -1,0 +1,83 @@
+import Pattern from utilities.Regex;
+
+namespace Compiler;
+
+internal class Lexer
+{
+
+    /**
+     * Interesting concepts being represented here.
+     *
+     * Because an explicit type assertion was made, the compiler can make some assumptions about
+     * what is going on here. Both the Pattern and Token class have constructors that take the pattern
+     * and string, respectively. So because of the types of the map, the compiler nows the call the 
+     * constructorfor each of these entries.
+     *
+     * I like the syntax of this. I think allowing the creation of dynamic syntax to represent 
+     * datastructures can do alot to increase readability.
+     */
+    private patternTokenMap: Map<Pattern, Token> = [
+        \r\n|\n           =>  "newline",
+        [ \t]+            =>  "whitespcae",
+        0|[1-9][0-9]*     =>  "integer",
+        \'[^\']\'         =>  "character",
+        .
+        .
+        .
+    ]
+
+    private line = 1;
+    private column = 1;
+
+    // The reciever field is an array of type function that takes a string. Return type doesn't matter.
+    private recievers: [(Token, string) => any];
+
+    /**
+     * This is a setter for recievers. Not too sure about the syntax.
+     * This could be a fullblown method, but no need since the param is the same as
+     * the field being set to.
+     *
+     *     recievers(recievers: (Token, string) => any | [(Token, string) => any]);
+     *
+     * This would also work. Would be called with Lexer.recievers(params)
+     */
+    internal recievers pipeTo(recievers: [(Token, string) => any]);
+
+    private lexQueue: string;
+
+    internal nextLine(line: string)
+    {
+        for(let character in line)
+        {
+            column++;
+            lexQueue += character;
+
+            /**
+             * Filter removes patternTokens that aren't matched by respective pattern.
+             */
+            let patternTokenFilter = patternTokenMap.filter(pattern => {
+                return pattern.execute(lexQueue) is string;
+            });
+
+
+            // tokenFilter may have multiple entries. That's fine.
+            // The first of those entries is the thing that matters.
+            let patternToken = patternTokenFilter.entries().next().value;
+            let value = patternToken[0].execute(lexQueue);
+            lexQueue = lexQueue.replace(value, '');
+            this.pipe(patternToken[1], value);
+
+
+        }
+        line++;
+    }
+
+    private pipe(Token: token, value: string)
+    {
+        for(let reciever in recievers)
+        {
+            reciever(token, value);
+        }
+    }
+
+}

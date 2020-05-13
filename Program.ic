@@ -1,0 +1,43 @@
+/**
+ * Filler. Not hard set on the standard library.
+ */
+import File from utilities.io.File;
+import FileStream from utilities.io.Streams;
+
+namespace Compiler;
+
+/**
+ * I'm pretty hard set on main not having to be in a class,
+ * but I'm not sure about allowing it.
+ */
+internal function main(args: string[]): void
+{
+    if(args.length < 1) throw InvalidArgumentsException();
+
+    let file = new File(args[0]);
+
+    let fileStream = new FileStream(file);
+
+    let lexer = new Lexer();
+    let parser = new Parser();
+
+    /**
+     * Lexer pipes token into parser.nextToken() as well as a lambda to print that caught token.
+     * pipeTo() accepts an array, but will promote a single value to an array if it has the right
+     * type.
+     * 
+     *     lexer.pipeTo(parser.nextToken());
+     * 
+     * Above would work as well without having to explicitly cater to it.
+     */
+    lexer.pipeTo([parser.nextToken(), (token: Token) => console.writeLine(token.name + " : " + token.value)]);
+
+    
+
+    // in keyword instead of colon because of the way types are specified.
+    for(let line in fileStream)
+    {
+        lexer.nextLine(line);
+    }
+
+}

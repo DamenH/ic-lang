@@ -1,0 +1,45 @@
+public abstract class Graph
+{
+    protected adjacencyList: [Node ? [Node]];
+    abstract removeNode(Node);
+
+}
+
+public class DirectedGraph : Graph
+{
+    public DirectedGraph(adjacencyList: [Node =>|<> [Node]])
+    {
+        this.adjacencyList = adjacencyList;
+    }
+
+    public removeNode(node: Node)
+    {
+        // remove node code
+    }
+}
+
+
+public class UndirectedGraph : Graph
+{
+    public UndirectedGraph(adjacencyList: [Node | [Node]])
+    {
+        this.adjacencyList = adjacencyList;
+    }
+
+    public removeNode(node: Node)
+    {
+        // remove node code
+    }
+}
+
+
+
+let directedGraph: DirectedGraph = [
+    "A" => ["B", "C"],
+    "B" => ["B", "A"]
+]
+
+let undirectedGraph: UndirectedGraph = [
+    "A" | ["B", "C"],
+    "B" | ["B", "A"] // second A is redundant, but allowed
+]
